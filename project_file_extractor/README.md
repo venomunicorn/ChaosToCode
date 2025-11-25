@@ -1,74 +1,108 @@
-# Chaos-to-Code
+# Project File Extractor
 
-**Agentic File Organizer – Only for Existing Code**
-
-## Overview
-This tool processes messy text/code dumps using Ollama LLM, but **strictly forbids any code generation**. It ONLY extracts and organizes code that already exists in your input text, preserving formatting exactly. It will never write new functions, fill TODOs, or complete incomplete logic.
-
----
+Production-ready tool to extract and create project files from text documents using local LLMs with 128k context chat models.
 
 ## Features
-- STREAMING pipeline for large dumps
-- Automated Ollama setup
-- Robust error handling
-- Two commands: `organize` and `clean`
-- **Strict parser mode** (no code generation)
 
----
+- Extract file structure from text documents
+- Generate code for each file using LLM (Ollama chat models, 128k context)
+- Create directory structure for a full project
+- Secure file operations (path traversal protection)
+- Detailed logging and error handling
+- Modern dependency management
+- Ready for Pytest-based testing
 
 ## Requirements
-- Python 3.11+
-- Ollama installed and running locally (auto-launched)
-- Default Model: qwen2.5-coder:7b (others supported if specified)
 
----
+- Python 3.8+
+- Ollama running locally and a chat model (128k context recommended: `qwen2.5:32b`)
+- See requirements.txt for all Python dependencies
 
 ## Installation
-1. Install Ollama ([link](https://ollama.com/download))
-2. Clone repo, install deps:
+
+1. **Install Ollama:**
+   - Linux/Mac:
+    ```bash
+    curl https://ollama.ai/install.sh | sh
+    ```
+   - Windows: Download from https://ollama.ai/download
+
+2. **Pull recommended model:**
    ```bash
-   git clone https://github.com/venomunicorn/ChaosToCode.git
-   cd ChaosToCode
+   ollama pull qwen2.5:32b
+   ```
+   *For 8GB VRAM, try also `qwen2.5:14b` or `gemma2:9b` as fallback.*
+
+3. **Install Python dependencies:**
+   ```bash
    pip install -r requirements.txt
    ```
-3. Setup Ollama and download default model:
+
+4. **Configure environment:**
    ```bash
-   python src/ollama_manager.py
+   cp .env.example .env
+   # Edit .env for path, model, and settings
    ```
 
----
-
 ## Usage
-#### Only Organizes Existing Code
+
+- **Basic usage:**
+   ```bash
+   python main.py projectTracker.txt
+   ```
+- **Set output dir:**
+   ```bash
+   python main.py projectTracker.txt -o ./my_output
+   ```
+- **Choose another model:**
+   ```bash
+   python main.py projectTracker.txt -m qwen2.5:14b
+   ```
+- **Verbose mode:**
+   ```bash
+   python main.py projectTracker.txt -v
+   ```
+
+## Pipeline
+
+- Uses only the following core modules:
+  - `main.py` (entry point)
+  - `config.py`, `logger_config.py`, `llm_client.py`, `file_extractor.py`, `file_creator.py`
+- All logic is unified in these files (NO usage of old ai.py, parser.py, etc.)
+- `ollama_manager.py` is a helper CLI to set up and fetch models, not used by extraction pipeline.
+
+## Configuration
+
+- `.env` and `.env.example` contain all variables used in pipeline. 
+- Only relevant variables will be read (ignore any others).
+
+## Testing
+
+Run the main test suite with:
 ```bash
-python -m src.main organize dump.txt
-```
-- If dump.txt contains code, it will be PARSED and ORGANIZED into files
-- If dump.txt only has descriptions, empty files or NO output will be created
-- Will never generate new code
-
-#### Clean Output
-```bash
-python -m src.main clean --output-dir extracted_files
+pytest project_file_extractor/tests/ -v --cov=.
 ```
 
----
+## Security
 
-## How It Works
-- **System Prompt:** Instructs model never to generate or complete code
-- **Parser:** Extracts files based on delimiters from LLM output
-- **Output:** Only code from input is written, unchanged
+- Path traversal protection
+- Input size and extension validation
+- Secure file permission (600)
+- Logging filters for sensitive info
+- LLM request timeout/retry safeguards
 
----
+## Troubleshooting
 
-## Example Workflow
-```bash
-# Clone, setup, organize ONLY existing code from input
-python src/ollama_manager.py
-python -m src.main organize dump.txt   # ONLY organizes code in dump.txt
-ls output/
-```
----
+- Use `ollama_manager.py` (CLI) to check/start Ollama service and download models before running extraction.
+- Increase timeout in .env for large projects.
+- If requirements missing, update with provided requirements.txt.
 
-## Support
-For issues/questions, open GitHub issues or see [Ollama docs](https://ollama.com/docs)
+## Changelog
+
+- Removed deprecated modules: ai.py, parser.py
+- Unified requirements in requirements.txt
+- Confirmed LLM and extraction logic only flows through main pipeline
+- Ensured consistent configuration, logging, and fallback handling
+
+## License
+MIT License
