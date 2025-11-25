@@ -1,0 +1,13 @@
+This is a dump file.
+
+### START module1.py
+def hello():
+    print("Hello World")
+### END module1.py
+
+Some random text.
+
+### START module2.py
+class Foo:
+    pass
+### END module2.py

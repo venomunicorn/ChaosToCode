@@ -1,69 +1,40 @@
-# Project File Extractor
+# ChaosToCode: Zero-Copy Slicer
 
-Production-grade tool for extracting and creating project files from structured text using Ollama LLMs (128k context, chat models). Now updated with Anaconda Prompt (Windows) instructions.
+ChaosToCode is a tool designed to extract code files from a raw text dump using an LLM to identify boundaries and a Python engine to slice the content efficiently.
 
-## Features
-- Extract file structure and code from docs/specs
-- Robust tests and secure production logic (OWASP-aligned)
-- Cross-platform: Windows (Anaconda Prompt, CMD, PowerShell), Linux, Mac
+## Architecture
 
----
+The project follows a modular "Zero-Copy Slicer" architecture:
 
-## Quick Start: Windows (Anaconda Prompt)
+- **`app/core`**: Handles LLM communication and prompts.
+- **`app/engine`**: Contains the logic for boundary detection and content slicing.
+- **`app/utils`**: Utilities for logging, security, and file I/O.
+- **`app/main.py`**: The entry point of the application.
 
-### 1. Open Anaconda Prompt and set up Python env
-```sh
-conda create -n fileextractor python=3.10 -y
-conda activate fileextractor
+## Installation
+
+1. Clone the repository.
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Configure environment variables:
+   - Copy `.env.example` to `.env`.
+   - Set your `LLM_API_KEY` and `LLM_ENDPOINT`.
+
+## Usage
+
+To run the slicer:
+
+```bash
+python -m app.main --input input_data/dump.txt --output output_sliced_files/
 ```
 
-### 2. Install Ollama for Windows
-- Download and install from: [https://ollama.ai/download](https://ollama.ai/download)
-- Start Ollama: 
-  ```sh
-  ollama serve
-  ```
+- `--input`: Path to the raw text file containing code.
+- `--output`: Directory where extracted files will be saved.
 
-### 3. Pull a chat model (in Anaconda Prompt)
-```sh
-ollama pull qwen2.5:32b
-# Or, for lower VRAM
-ollama pull qwen2.5:14b
-ollama pull gemma2:9b
-```
+## Security
 
-### 4. Get the project and install Python requirements
-```sh
-git clone https://github.com/venomunicorn/ChaosToCode.git
-cd ChaosToCode/project_file_extractor
-pip install -r requirements.txt
-```
-
-### 5. Create and configure .env
-```sh
-copy .env.example .env
-# Edit .env in Notepad/VSCode to set OLLAMA_MODEL and other values
-```
-
-### 6. Run extraction (normal usage)
-```sh
-python main.py projectTracker.txt
-```
-
-### 7. (Optional) Run tests
-```sh
-pytest tests/ -v --cov=.
-```
-
----
-
-## Linux / Mac Setup
-Follow the original README's Linux/Mac section for curl-based Ollama install and steps. All commands work in bash/zsh as shown above.
-
-## Troubleshooting
-- If `ollama` is not recognized, add its path to your environment or re-launch Anaconda Prompt after installation.
-- If model pulling or extraction fails, verify Ollama is running (`ollama serve`) and model is present (`ollama list`).
-- Tune `OLLAMA_TIMEOUT` in `.env` for large docs.
-
-## License
-MIT License
+- Path traversal protection is enabled for input and output paths.
+- Input text is sanitized before being sent to the LLM.
+- Secrets are managed via environment variables.
