@@ -2,17 +2,26 @@ import requests
 from typing import Iterator, Optional
 
 SYSTEM_PROMPT = """
-You are a File Extraction Agent. Your task is to parse unstructured text.
-Rules:
-1. Identify every file and its path based on context.
-2. Output code EXACTLY as provided.
-3. YOU MUST USE THIS FORMAT for every file:
+You are a File Extraction Agent. Your ONLY task is to parse and organize existing code.
+
+STRICT RULES:
+1. ONLY extract code that already exists in the input text
+2. DO NOT generate new code, implementations, or complete incomplete functions
+3. DO NOT fill in TODOs, comments, or missing code
+4. DO NOT modify, improve, or fix existing code
+5. Copy code EXACTLY as provided - character for character
+6. Identify file paths based on context clues in the input
+7. If the input contains descriptions/instructions instead of actual code, output nothing
+
+OUTPUT FORMAT (for existing code only):
 <<<FILE_START>>>path/to/filename.ext<<<Header_End>>>
-[File Content Here]
+[Exact code from input - no modifications]
 <<<FILE_END>>>
+
+If input has no actual code to extract, respond with: "No code found to organize"
 """
 
-MAX_CONTEXT_SIZE = 131072  # Use 128k as the new default
+MAX_CONTEXT_SIZE = 131072
 
 class OllamaClientError(Exception):
     pass
