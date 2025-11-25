@@ -1,97 +1,69 @@
 # Project File Extractor
 
-Production-ready tool for extracting and creating project files from structured text (like specs or README docs) using local LLMs with 128k context (Ollama chat models).
+Production-grade tool for extracting and creating project files from structured text using Ollama LLMs (128k context, chat models). Now updated with Anaconda Prompt (Windows) instructions.
 
 ## Features
-- Full extraction and code generation pipeline ready for production
-- Secure, validated input and output (OWASP-aligned)
-- Comprehensive tests:
-  - Unit, integration, error path, e2e coverage
-- Works on **Windows, Linux, and Mac**, with extra clarity for Windows setup
-- Stepwise setup and troubleshooting instructions
+- Extract file structure and code from docs/specs
+- Robust tests and secure production logic (OWASP-aligned)
+- Cross-platform: Windows (Anaconda Prompt, CMD, PowerShell), Linux, Mac
 
-## Requirements
-- Python 3.8+
-- Ollama running locally, with a "chat" model (128k context recommended: `qwen2.5:32b`)
-- See requirements.txt for all Python dependencies
+---
 
-## Installation and Setup
+## Quick Start: Windows (Anaconda Prompt)
 
-### 1. Install Ollama:
-#### Windows:
-- Download & install from [https://ollama.ai/download](https://ollama.ai/download)
-- Launch from Start menu or run:  
-  ```powershell
-  ollama serve
-  ```
-#### Linux/Mac:
-- Terminal:  
-  ```bash
-  curl https://ollama.ai/install.sh | sh
-  ollama serve
-  ```
-
-### 2. Pull your model (all OSes):
-```shell
-ollama pull qwen2.5:32b
-# for lower VRAM, try qwen2.5:14b or gemma2:9b
+### 1. Open Anaconda Prompt and set up Python env
+```sh
+conda create -n fileextractor python=3.10 -y
+conda activate fileextractor
 ```
 
-### 3. Clone and install the extractor:
-```shell
+### 2. Install Ollama for Windows
+- Download and install from: [https://ollama.ai/download](https://ollama.ai/download)
+- Start Ollama: 
+  ```sh
+  ollama serve
+  ```
+
+### 3. Pull a chat model (in Anaconda Prompt)
+```sh
+ollama pull qwen2.5:32b
+# Or, for lower VRAM
+ollama pull qwen2.5:14b
+ollama pull gemma2:9b
+```
+
+### 4. Get the project and install Python requirements
+```sh
 git clone https://github.com/venomunicorn/ChaosToCode.git
 cd ChaosToCode/project_file_extractor
 pip install -r requirements.txt
 ```
 
-### 4. Configure:
-```shell
-cp .env.example .env   # (Windows: copy .env.example .env)
-edit .env              # set OLLAMA_MODEL, paths
+### 5. Create and configure .env
+```sh
+copy .env.example .env
+# Edit .env in Notepad/VSCode to set OLLAMA_MODEL and other values
 ```
 
-## Usage
-- Extract from doc:
-  ```shell
-  python main.py projectTracker.txt
-  ```
-- Custom output location:
-  ```shell
-  python main.py mydoc.txt -o ./my_extracted_project
-  ```
-- Change model (if needed):
-  ```shell
-  python main.py mydoc.txt -m qwen2.5:14b
-  ```
-- Verbose mode:
-  ```shell
-  python main.py mydoc.txt -v
-  ```
+### 6. Run extraction (normal usage)
+```sh
+python main.py projectTracker.txt
+```
 
-## Advanced: Running tests
-```shell
+### 7. (Optional) Run tests
+```sh
 pytest tests/ -v --cov=.
 ```
 
-## Model management/troubleshooting (all OS):
-```shell
-python ollama_manager.py --model qwen2.5:32b
-```
-- Increase `OLLAMA_TIMEOUT` in `.env` for very large projects (e.g., 600s for 128k content)
+---
 
-## Security Considerations
-- All file/system and model input/output is validated and sanitized
-- Path traversal and unsafe files are skipped with strong logging
-- Secrets are never logged and must be set as env vars or in `.env`
-- Logs redact sensitive terms and are rotated to avoid leaks
+## Linux / Mac Setup
+Follow the original README's Linux/Mac section for curl-based Ollama install and steps. All commands work in bash/zsh as shown above.
 
-## FAQ
-- For permissions, encoding, or executable errors on Windows: **always run shells "As Administrator" if needed.**
-- All example commands run on Windows (PowerShell/CMD) and Linux/Mac.
-
-## Support
-- [Raise issues here](https://github.com/venomunicorn/ChaosToCode/issues) or [discuss](https://github.com/venomunicorn/ChaosToCode/discussions)
-- PRs welcome for new LLM models, security, or OS improvements
+## Troubleshooting
+- If `ollama` is not recognized, add its path to your environment or re-launch Anaconda Prompt after installation.
+- If model pulling or extraction fails, verify Ollama is running (`ollama serve`) and model is present (`ollama list`).
+- Tune `OLLAMA_TIMEOUT` in `.env` for large docs.
 
 ## License
 MIT License
