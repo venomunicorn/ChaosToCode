@@ -2,6 +2,8 @@ import re
 import os
 from typing import Iterator
 from pathlib import Path
+import sys
+import time
 
 FILE_START_RE = re.compile(r"<<<FILE_START>>>((?:[^<]|<(?!!<))*?)<<<Header_End>>>", re.MULTILINE)
 FILE_END = "<<<FILE_END>>>"
@@ -9,16 +11,26 @@ FILE_END = "<<<FILE_END>>>"
 class ParsingError(Exception):
     pass
 
-def stream_parse_ollama_output(stream: Iterator[str], output_dir: Path):
+def stream_parse_ollama_output(stream: Iterator[str], output_dir: Path, verbose: bool = True):
     """
     Generator function that parses Ollama output and writes files as soon as <<<FILE_END>>> is hit.
     Handles delimiters that may be split across stream chunks.
+    If verbose: Prints live progress:
+        - Streaming LLM tokens
+        - File/folder creation
     """
     buffer = ""
     open_file = None
     file_path = None
+    file_count = 0
+    last_chunk_time = time.time()
     try:
         for chunk in stream:
+            if verbose:
+                sys.stdout.write(chunk)
+                sys.stdout.flush()
+
+            last_chunk_time = time.time()
             buffer += chunk
             while True:
                 if open_file is None:
@@ -28,6 +40,8 @@ def stream_parse_ollama_output(stream: Iterator[str], output_dir: Path):
                         rest = buffer[start_match.end():]
                         open_file = []
                         buffer = rest
+                        if verbose:
+                            print(f"\n[INFO] Detected file to create: {file_path}")
                     else:
                         # No file started yet, keep buffering
                         break
@@ -46,10 +60,18 @@ def stream_parse_ollama_output(stream: Iterator[str], output_dir: Path):
                         try:
                             with open(abs_path, "w", encoding="utf-8") as f:
                                 f.write(full_file_data.strip("\n"))
+                            file_count += 1
+                            if verbose:
+                                print(f"[OK] Wrote file: {abs_path} (Total: {file_count})")
                         except OSError as e:
+                            print(f"[ERROR] Failed to write file {abs_path}: {e}")
                             raise ParsingError(f"Failed to write file {abs_path}: {e}")
                         # Reset state for next file
                         buffer = buffer[end_idx + len(FILE_END):]
                         open_file, file_path = None, None
+            # If no chunk received in 30s, print warning
+            if verbose and (time.time() - last_chunk_time > 30):
+                print("[WARNING] No LLM output received in 30 seconds. Still waiting...")
+                last_chunk_time = time.time()
     except Exception as e:
         raise ParsingError(f"Parser error: {e}")
