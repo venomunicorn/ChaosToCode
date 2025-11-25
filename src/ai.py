@@ -12,14 +12,13 @@ Rules:
 <<<FILE_END>>>
 """
 
-# Update: max supported context size for models like qwen2.5: 8192
-MAX_CONTEXT_SIZE = 8192  # adjust as needed for your model, e.g. 128k for larger models
+MAX_CONTEXT_SIZE = 131072  # Use 128k as the new default
 
 class OllamaClientError(Exception):
     pass
 
 class OllamaClient:
-    def __init__(self, model: str = "qwen2.5:7b", host: str = "http://localhost:11434", context_size: int = MAX_CONTEXT_SIZE):
+    def __init__(self, model: str = "qwen2.5-coder:7b", host: str = "http://localhost:11434", context_size: int = MAX_CONTEXT_SIZE):
         self.model = model
         self.host = host
         self.context_size = context_size
