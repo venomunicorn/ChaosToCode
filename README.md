@@ -1,108 +1,69 @@
 # Project File Extractor
 
-Production-ready tool to extract and create project files from text documents using local LLMs with 128k context chat models.
+Production-grade tool for extracting and creating project files from structured text using Ollama LLMs (128k context, chat models). Now updated with Anaconda Prompt (Windows) instructions.
 
 ## Features
+- Extract file structure and code from docs/specs
+- Robust tests and secure production logic (OWASP-aligned)
+- Cross-platform: Windows (Anaconda Prompt, CMD, PowerShell), Linux, Mac
 
-- Extract file structure from text documents
-- Generate code for each file using LLM (Ollama chat models, 128k context)
-- Create directory structure for a full project
-- Secure file operations (path traversal protection)
-- Detailed logging and error handling
-- Modern dependency management
-- Ready for Pytest-based testing
+---
 
-## Requirements
+## Quick Start: Windows (Anaconda Prompt)
 
-- Python 3.8+
-- Ollama running locally and a chat model (128k context recommended: `qwen2.5:32b`)
-- See requirements.txt for all Python dependencies
-
-## Installation
-
-1. **Install Ollama:**
-   - Linux/Mac:
-    ```bash
-    curl https://ollama.ai/install.sh | sh
-    ```
-   - Windows: Download from https://ollama.ai/download
-
-2. **Pull recommended model:**
-   ```bash
-   ollama pull qwen2.5:32b
-   ```
-   *For 8GB VRAM, try also `qwen2.5:14b` or `gemma2:9b` as fallback.*
-
-3. **Install Python dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Configure environment:**
-   ```bash
-   cp .env.example .env
-   # Edit .env for path, model, and settings
-   ```
-
-## Usage
-
-- **Basic usage:**
-   ```bash
-   python main.py projectTracker.txt
-   ```
-- **Set output dir:**
-   ```bash
-   python main.py projectTracker.txt -o ./my_output
-   ```
-- **Choose another model:**
-   ```bash
-   python main.py projectTracker.txt -m qwen2.5:14b
-   ```
-- **Verbose mode:**
-   ```bash
-   python main.py projectTracker.txt -v
-   ```
-
-## Pipeline
-
-- Uses only the following core modules:
-  - `main.py` (entry point)
-  - `config.py`, `logger_config.py`, `llm_client.py`, `file_extractor.py`, `file_creator.py`
-- All logic is unified in these files (NO usage of old ai.py, parser.py, etc.)
-- `ollama_manager.py` is a helper CLI to set up and fetch models, not used by extraction pipeline.
-
-## Configuration
-
-- `.env` and `.env.example` contain all variables used in pipeline. 
-- Only relevant variables will be read (ignore any others).
-
-## Testing
-
-Run the main test suite with:
-```bash
-pytest project_file_extractor/tests/ -v --cov=.
+### 1. Open Anaconda Prompt and set up Python env
+```sh
+conda create -n fileextractor python=3.10 -y
+conda activate fileextractor
 ```
 
-## Security
+### 2. Install Ollama for Windows
+- Download and install from: [https://ollama.ai/download](https://ollama.ai/download)
+- Start Ollama: 
+  ```sh
+  ollama serve
+  ```
 
-- Path traversal protection
-- Input size and extension validation
-- Secure file permission (600)
-- Logging filters for sensitive info
-- LLM request timeout/retry safeguards
+### 3. Pull a chat model (in Anaconda Prompt)
+```sh
+ollama pull qwen2.5:32b
+# Or, for lower VRAM
+ollama pull qwen2.5:14b
+ollama pull gemma2:9b
+```
+
+### 4. Get the project and install Python requirements
+```sh
+git clone https://github.com/venomunicorn/ChaosToCode.git
+cd ChaosToCode/project_file_extractor
+pip install -r requirements.txt
+```
+
+### 5. Create and configure .env
+```sh
+copy .env.example .env
+# Edit .env in Notepad/VSCode to set OLLAMA_MODEL and other values
+```
+
+### 6. Run extraction (normal usage)
+```sh
+python main.py projectTracker.txt
+```
+
+### 7. (Optional) Run tests
+```sh
+pytest tests/ -v --cov=.
+```
+
+---
+
+## Linux / Mac Setup
+Follow the original README's Linux/Mac section for curl-based Ollama install and steps. All commands work in bash/zsh as shown above.
 
 ## Troubleshooting
-
-- Use `ollama_manager.py` (CLI) to check/start Ollama service and download models before running extraction.
-- Increase timeout in .env for large projects.
-- If requirements missing, update with provided requirements.txt.
-
-## Changelog
-
-- Removed deprecated modules: ai.py, parser.py
-- Unified requirements in requirements.txt
-- Confirmed LLM and extraction logic only flows through main pipeline
-- Ensured consistent configuration, logging, and fallback handling
+- If `ollama` is not recognized, add its path to your environment or re-launch Anaconda Prompt after installation.
+- If model pulling or extraction fails, verify Ollama is running (`ollama serve`) and model is present (`ollama list`).
+- Tune `OLLAMA_TIMEOUT` in `.env` for large docs.
 
 ## License
 MIT License
