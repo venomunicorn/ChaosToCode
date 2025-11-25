@@ -12,13 +12,17 @@ Rules:
 <<<FILE_END>>>
 """
 
+# Update: max supported context size for models like qwen2.5: 8192
+MAX_CONTEXT_SIZE = 8192  # adjust as needed for your model, e.g. 128k for larger models
+
 class OllamaClientError(Exception):
     pass
 
 class OllamaClient:
-    def __init__(self, model: str = "qwen2.5:7b", host: str = "http://localhost:11434"):
+    def __init__(self, model: str = "qwen2.5:7b", host: str = "http://localhost:11434", context_size: int = MAX_CONTEXT_SIZE):
         self.model = model
         self.host = host
+        self.context_size = context_size
 
     def stream(self, prompt: str, system_prompt: Optional[str] = None) -> Iterator[str]:
         url = f"{self.host}/api/generate"
@@ -26,6 +30,7 @@ class OllamaClient:
             "model": self.model,
             "prompt": prompt,
             "stream": True,
+            "options": {"context_size": self.context_size}
         }
         if system_prompt:
             body["system"] = system_prompt
