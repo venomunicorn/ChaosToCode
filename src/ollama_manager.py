@@ -13,7 +13,6 @@ class OllamaManager:
         self.api_url = f"{host}/api"
     
     def is_ollama_running(self) -> bool:
-        """Check if Ollama service is running."""
         try:
             response = requests.get(f"{self.host}/api/version", timeout=2)
             return response.status_code == 200
@@ -21,14 +20,11 @@ class OllamaManager:
             return False
     
     def start_ollama(self) -> bool:
-        """Start Ollama service based on the operating system."""
         if self.is_ollama_running():
             print("✓ Ollama is already running")
             return True
-        
         print("Starting Ollama service...")
         system = platform.system()
-        
         try:
             if system == "Windows":
                 subprocess.Popen(["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0)
@@ -53,7 +49,6 @@ class OllamaManager:
             return False
     
     def is_model_available(self, model_name: str) -> bool:
-        """Check if a model is already downloaded."""
         try:
             response = requests.get(f"{self.api_url}/tags", timeout=5)
             if response.status_code == 200:
@@ -65,19 +60,19 @@ class OllamaManager:
             return False
     
     def download_model(self, model_name: str) -> bool:
-        """Download a model if not already available."""
+        # Default to qwen2.5-coder:7b if not specified
+        if not model_name:
+            model_name = "qwen2.5-coder:7b"
         if self.is_model_available(model_name):
             print(f"✓ Model '{model_name}' is already available")
             return True
-        
         print(f"Downloading model '{model_name}'... This may take several minutes.")
         try:
-            # Use utf-8 encoding on all platforms!
             process = subprocess.Popen(
                 ["ollama", "pull", model_name],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
-                encoding="utf-8",  # fixes charmap codec errors on Windows
+                encoding="utf-8",
                 universal_newlines=True
             )
             for line in process.stdout:
@@ -96,7 +91,7 @@ class OllamaManager:
             print(f"✗ Error downloading model: {e}")
             return False
     
-    def setup(self, model_name: str = "qwen2.5:7b") -> bool:
+    def setup(self, model_name: str = "qwen2.5-coder:7b") -> bool:
         print("=" * 50)
         print("OLLAMA SETUP")
         print("=" * 50)
@@ -112,7 +107,7 @@ class OllamaManager:
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Manage Ollama service and models")
-    parser.add_argument("--model", type=str, default="qwen2.5:7b", help="Model to download (default: qwen2.5:7b)")
+    parser.add_argument("--model", type=str, default="qwen2.5-coder:7b", help="Model to download (default: qwen2.5-coder:7b)")
     parser.add_argument("--host", type=str, default="http://localhost:11434", help="Ollama host URL (default: http://localhost:11434)")
     args = parser.parse_args()
     manager = OllamaManager(host=args.host)
